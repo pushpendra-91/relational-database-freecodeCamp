@@ -6,6 +6,7 @@ echo -e "\n~~~~~ MY SALON ~~~~~\n"
 
 MAKE_APPOINTMENT(){
   SERVICE_ID=$1
+  SERVICE_ID=$(echo $SERVICE_ID | sed -r 's/ //g')
   echo -e "\nEnter phone number"
   read CUSTOMER_PHONE
 
@@ -14,17 +15,19 @@ MAKE_APPOINTMENT(){
   then
     echo -e "\nEnter name"
     read CUSTOMER_NAME
-    echo -e "\nEnter Service Time"
-    read SERVICE_TIME
     NEW_CUSTOMER=$($PSQL "INSERT INTO customers(phone, name) VALUES('$CUSTOMER_PHONE', '$CUSTOMER_NAME')")
   fi
+
+  echo -e "\nEnter Service Time"
+  read SERVICE_TIME
     
   CUSTOMER_ID=$($PSQL "SELECT customer_id from customers WHERE phone='$CUSTOMER_PHONE'")
-
+  CUSTOMER_ID=$(echo $CUSTOMER_ID | sed -r 's/ //g')
+  
   INSERT_APPOINTMENT=$($PSQL "INSERT INTO appointments(customer_id, service_id, time) VALUES('$CUSTOMER_ID', '$SERVICE_ID', '$SERVICE_TIME')")
-
   SERVICE_NAME=$($PSQL "SELECT name FROM services WHERE service_id='$SERVICE_ID'")
-  echo -e "\nI have put you down for a $SERVICE_NAME at $SERVICE_TIME, $CUSTOMER_NAME."
+  CUSTOMER_NAME=$($PSQL "SELECT name from customers WHERE phone='$CUSTOMER_PHONE'")
+  echo -e "\nI have put you down for a $(echo $SERVICE_NAME | sed -r 's/ //g') at $SERVICE_TIME, $(echo $CUSTOMER_NAME | sed -r 's/^ *| *$//g')."
 }
 
 MAIN_MENU(){
